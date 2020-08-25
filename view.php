@@ -72,9 +72,11 @@ switch ($config->size) {
 }
 
 // Start output to browser.
+/* This will go in the renderer
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'block_superframe'), 5);
 echo '<br>'.fullname($USER).'<br>';
+*/
 // echo '<div>';
 // echo '<script src="https://cdn.htmlgames.com/embed.js?game=TetrisFun&amp;bgcolor=white"></script>';
 // echo '</div>';
@@ -83,6 +85,7 @@ echo '<br>'.fullname($USER).'<br>';
 $url = 'https://quizlet.com/132695231/scatter/embed';
 $width = '600px';
 $height = '400px';
+/* this will go in the renderer
 $attribute = ['src'=>$url,
                 'width'=>$width,
                 'height'=>$height];
@@ -90,3 +93,6 @@ echo html_writer::start_tag('iframe',$attribute);
 echo html_writer::end_tag('iframe');
 //send footer out to browser
 echo $OUTPUT->footer();
+*/
+$renderer = $PAGE->get_renderer('block_superframe');
+$renderer->display_view_page($url, $width, $height);
