@@ -78,10 +78,22 @@ class block_superframe extends block_base {
         $this->content->footer = '';
         $this->content->text = get_string('welcomeuser', 'block_superframe',
                 $USER);
-        $this->content->text .= '<p>'.get_string('message', 'block_superframe');
-        $this->content->text .= '<br><a href="'.$CFG->wwwroot.'/blocks/superframe/view.php
-        ">'.get_string('viewlink','block_superframe').'</a>';
+        // Add the block id to the Moodle URL for the view page.
+        $blockid = $this->instance->id;
+        $courseid = $this->page->course->id;
+        $context = context_block::instance($blockid);
+        if (has_capability('block/superframe:seeviewpage', $context)) {
+            $url = new moodle_url('/blocks/superframe/view.php',['blockid'=>$blockid]);
+            // $this->content->text .= '<p>'.get_string('message', 'block_superframe');
+            // $this->content->text .= '<br><a href="'.$CFG->wwwroot.'/blocks/superframe/view.php
+            // ">'.get_string('viewlink','block_superframe').'</a>';
+            $this->content->text .= '<p>'.html_writer::link($url,get_string('viewlink','block_superframe')).'</p>';
+        }
 
+        $users = self::get_course_users($courseid);
+        foreach ($users as $user) {
+            $this->content->text .='<li>' . $user->firstname . '</li>';
+        }
         return $this->content;
     }
     /**
@@ -100,6 +112,29 @@ class block_superframe extends block_base {
      */
     function instance_allow_multiple() {
         return true;
+    }
+
+    /**
+     * Allow block configuration.
+     */
+    function has_config() {
+        return true;
+    }
+
+    private static function get_course_users($courseid) {
+        global $DB;
+
+        $sql = "SELECT u.id, u.firstname
+                FROM {course} as c
+                JOIN {context} as x ON c.id = x.instanceid
+                JOIN {role_assignments} as r ON r.contextid = x.id
+                JOIN {user} AS u ON u.id = r.userid
+               WHERE c.id = :courseid
+                 AND r.roleid = :roleid";
+
+        $records = $DB->get_records_sql($sql, ['courseid' => $courseid, 'roleid' => 5]);
+
+        return $records;
     }
 
 }
